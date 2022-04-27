@@ -15,6 +15,7 @@ import similarProductsQuery from "../../sanity-queries/similarProductsQuery";
 import productDetailsQuery from "../../sanity-queries/productDetailsQuery";
 import useStore from "../../store/store";
 import shallow from "zustand/shallow";
+import handleCheckout from "../../lib/handleCheckout";
 
 const ProductDetails = ({ product, similarProducts }: any) => {
   const { onAdd } = useStore(
@@ -96,7 +97,13 @@ const ProductDetails = ({ product, similarProducts }: any) => {
             >
               Add to cart
             </button>
-            <button type="button" className="buy-now">
+            <button
+              type="button"
+              className="buy-now"
+              onClick={handleCheckout({
+                cartItems: [{ ...product, quantity: qty }],
+              })}
+            >
               Buy now
             </button>
           </div>

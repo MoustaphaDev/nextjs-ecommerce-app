@@ -19,8 +19,6 @@ export type CartItem = {
   }[];
 };
 type State = Readonly<{
-  showCart: boolean;
-  setShowCart: (showCart: boolean) => void;
   cartItems: Array<CartItem>;
   setCartItems: (newCartItems: Array<CartItem>) => void;
   totalPrice: number;
@@ -30,6 +28,7 @@ type State = Readonly<{
   incCartItemQty: (cartItemId: string) => () => void;
   decCartItemQty: (cartItemId: string, quantity: number) => () => void;
   handleRemoveItem: (cartItemId: string) => () => void;
+  emptyStore: () => void;
 }>;
 
 const productInCart = (cartItems: State["cartItems"], newProduct: CartItem) => {
@@ -130,33 +129,38 @@ const decCartItemQty = (set: ZustandSet) => {
   };
 };
 
+const defaultState: Pick<
+  State,
+  "cartItems" | "totalPrice" | "totalQuantities"
+> = {
+  cartItems: [],
+  totalPrice: 0,
+  totalQuantities: 0,
+};
+
 const useStore = create<State>(
   // @ts-ignore
   persist(
     (set) => ({
-      showCart: false,
-      setShowCart: () => {
-        console.log("changed cart state");
+      ...defaultState,
+      emptyStore: () => {
+        set(defaultState);
+        // @ts-ignore
+        useStore.persist.clearStorage();
+      },
+      setCartItems: (newCartItems) =>
         set((state) => ({
-          showCart: !state.showCart,
+          cartItems: newCartItems,
+        })),
+      setTotalPrice: (newTotalPrice) => {
+        set((state) => ({
+          totalPrice: newTotalPrice,
         }));
       },
-      cartItems: [],
-      setCartItems: (newCartItems) =>
-        set({
-          cartItems: newCartItems,
-        }),
-      totalPrice: 0,
-      setTotalPrice: (newTotalPrice) => {
-        set({
-          totalPrice: newTotalPrice,
-        });
-      },
-      totalQuantities: 0,
       resetTotalQuantities: () => {
-        set({
+        set((state) => ({
           totalQuantities: 0,
-        });
+        }));
       },
       onAdd: onAdd(set),
       incCartItemQty: incCartItemQty(set),

@@ -1,28 +1,25 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { MouseEventHandler, useCallback, useEffect, useRef } from "react";
+import { useRef } from "react";
 import {
   AiOutlineMinus,
   AiOutlinePlus,
   AiOutlineLeft,
   AiOutlineShopping,
 } from "react-icons/ai";
-import { TiDelete, TiDeleteOutline } from "react-icons/ti";
+import { TiDeleteOutline } from "react-icons/ti";
 import useStore from "../store/store";
 import shallow from "zustand/shallow";
 import { urlFor } from "../lib/client";
+import handleCheckout from "../lib/handleCheckout";
 
-import getStripe from "../lib/getStripe";
-import toast from "react-hot-toast";
-
-const Cart = () => {
+const Cart = ({ handleCloseCart }: { handleCloseCart: () => void }) => {
   const cartRef = useRef<HTMLDivElement | null>(null);
   const backButtonRef = useRef<HTMLButtonElement | null>(null);
   const {
     totalPrice,
     totalQuantities,
     cartItems,
-    setShowCart,
     incCartItemQty,
     decCartItemQty,
     handleRemoveItem,
@@ -31,34 +28,11 @@ const Cart = () => {
       totalPrice: state.totalPrice,
       totalQuantities: state.totalQuantities,
       cartItems: state.cartItems,
-      setShowCart: state.setShowCart,
       incCartItemQty: state.incCartItemQty,
       decCartItemQty: state.decCartItemQty,
       handleRemoveItem: state.handleRemoveItem,
     }),
     shallow
-  );
-  async function handleCheckout() {
-    const stripe = await getStripe();
-    const options: RequestInit = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ cartItems }),
-    };
-    const response = await fetch("/api/stripe", options);
-
-    if (response.status === 500) return;
-    const data = await response.json();
-    toast.loading("Redirecting...");
-    stripe?.redirectToCheckout({ sessionId: data.id });
-  }
-  const handleCloseCart: MouseEventHandler = useCallback(
-    (e) => {
-      setShowCart(false);
-    },
-    [setShowCart]
   );
   const displayTotalPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -155,7 +129,11 @@ const Cart = () => {
               <h3>{displayTotalPrice}</h3>
             </div>
             <div className="btn-container">
-              <button type="button" className="btn" onClick={handleCheckout}>
+              <button
+                type="button"
+                className="btn"
+                onClick={handleCheckout({ cartItems: cartItems })}
+              >
                 Pay with Stripe
               </button>
             </div>

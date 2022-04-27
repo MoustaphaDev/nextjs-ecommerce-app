@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { BsBagCheckFill } from "react-icons/bs";
+import { runFireWorks } from "../lib/utils";
 import useStore from "../store/store";
 
 const Success = () => {
+  const emptyStore = useStore((state) => state.emptyStore);
   useEffect(() => {
-    // @ts-ignore
-    useStore.persist.clearStorage();
-  }, []);
+    emptyStore();
+    runFireWorks();
+  });
 
   return (
     <div className="success-wrapper">

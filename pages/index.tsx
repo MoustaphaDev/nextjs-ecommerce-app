@@ -1,4 +1,3 @@
-import groq from "groq";
 import { InferGetStaticPropsType } from "next";
 import { HeroBanner, FooterBanner, Product } from "../components";
 import { client } from "../lib/client";
